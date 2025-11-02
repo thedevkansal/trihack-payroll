@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
 import { formatEther } from "viem";
+import { useAccount } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
+import { Alert, AlertDescription } from "~~/components/ui/alert";
+import { Badge } from "~~/components/ui/badge";
 import { Button } from "~~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~~/components/ui/card";
-import { Badge } from "~~/components/ui/badge";
-import { Alert, AlertDescription } from "~~/components/ui/alert";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -38,8 +38,10 @@ const EmployeeDashboard: NextPage = () => {
   const isActive = employeeData && employeeData[4];
   const terminationInitiated = employeeData && employeeData[5];
   const monthlySalary = employeeData && employeeData[1] ? formatEther(employeeData[1]) : "0";
-  const startDate = employeeData && employeeData[2] ? new Date(Number(employeeData[2]) * 1000).toLocaleDateString() : "N/A";
-  const lastPaymentDate = employeeData && employeeData[3] ? new Date(Number(employeeData[3]) * 1000).toLocaleDateString() : "N/A";
+  const startDate =
+    employeeData && employeeData[2] ? new Date(Number(employeeData[2]) * 1000).toLocaleDateString() : "N/A";
+  const lastPaymentDate =
+    employeeData && employeeData[3] ? new Date(Number(employeeData[3]) * 1000).toLocaleDateString() : "N/A";
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-5xl">
@@ -54,9 +56,7 @@ const EmployeeDashboard: NextPage = () => {
 
       {!connectedAddress && (
         <Alert variant="destructive">
-          <AlertDescription>
-            Please connect your wallet to view your employment status.
-          </AlertDescription>
+          <AlertDescription>Please connect your wallet to view your employment status.</AlertDescription>
         </Alert>
       )}
 
@@ -119,8 +119,8 @@ const EmployeeDashboard: NextPage = () => {
                 <div>
                   <p className="font-semibold mb-1">Severance Protection Active</p>
                   <p className="text-sm">
-                    If your employment is terminated, you will automatically receive 15 days of salary (
-                    {(parseFloat(monthlySalary) * 15 / 30).toFixed(4)} ETH) as severance pay.
+                    If your employment is terminated, you will receive severance pay based on your employment duration
+                    (calculated from days worked).
                   </p>
                 </div>
               </div>
@@ -136,8 +136,8 @@ const EmployeeDashboard: NextPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  Your employment termination has been initiated by your employer. You need to confirm the termination
-                  to receive your severance payment of <strong>{(parseFloat(monthlySalary) * 15 / 30).toFixed(4)} ETH</strong>.
+                  Your employment termination has been initiated. You need to confirm the termination to receive your
+                  severance payment based on your employment duration.
                 </p>
                 <Button onClick={handleConfirmTermination} variant="destructive" className="w-full">
                   Confirm Termination & Claim Severance
@@ -163,7 +163,7 @@ const EmployeeDashboard: NextPage = () => {
               </div>
               <div className="flex justify-between items-center p-4 bg-secondary rounded-lg">
                 <span className="font-medium">Severance Package (15 days)</span>
-                <span className="text-xl font-bold">{(parseFloat(monthlySalary) * 15 / 30).toFixed(4)} ETH</span>
+                <span className="text-xl font-bold">{((parseFloat(monthlySalary) * 15) / 30).toFixed(4)} ETH</span>
               </div>
               <Alert>
                 <AlertDescription className="text-sm">

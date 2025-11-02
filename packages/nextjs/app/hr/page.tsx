@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
 import { formatEther, parseEther } from "viem";
+import { useAccount } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
+import { Alert, AlertDescription } from "~~/components/ui/alert";
+import { Badge } from "~~/components/ui/badge";
 import { Button } from "~~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~~/components/ui/card";
 import { Input } from "~~/components/ui/input";
 import { Label } from "~~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~~/components/ui/tabs";
-import { Badge } from "~~/components/ui/badge";
-import { Alert, AlertDescription } from "~~/components/ui/alert";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -62,32 +62,14 @@ const HRDashboard: NextPage = () => {
       await writeYourContractAsync({
         functionName: "hireEmployee",
         args: [employeeAddress, parseEther(monthlySalary)],
+        value: parseEther(monthlySalary), // Deposit escrow when hiring
       });
-      notification.success("Employee hired successfully!");
+      notification.success("Employee hired successfully! Escrow deposited.");
       setEmployeeAddress("");
       setMonthlySalary("");
     } catch (error) {
       console.error("Error hiring employee:", error);
       notification.error("Failed to hire employee");
-    }
-  };
-
-  const handleDepositToEscrow = async () => {
-    if (!depositAmount) {
-      notification.error("Please enter a deposit amount");
-      return;
-    }
-
-    try {
-      await writeYourContractAsync({
-        functionName: "depositToEscrow",
-        value: parseEther(depositAmount),
-      });
-      notification.success("Funds deposited to escrow!");
-      setDepositAmount("");
-    } catch (error) {
-      console.error("Error depositing to escrow:", error);
-      notification.error("Failed to deposit to escrow");
     }
   };
 
@@ -184,10 +166,9 @@ const HRDashboard: NextPage = () => {
       {/* Main Tabs */}
       {companyData && companyData[1] && (
         <Tabs defaultValue="hire" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="hire">👥 Hire</TabsTrigger>
             <TabsTrigger value="pay">💸 Pay Salary</TabsTrigger>
-            <TabsTrigger value="deposit">💰 Deposit</TabsTrigger>
             <TabsTrigger value="manage">⚙️ Manage</TabsTrigger>
           </TabsList>
 
@@ -196,7 +177,9 @@ const HRDashboard: NextPage = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Hire New Employee</CardTitle>
-                <CardDescription>Add a new employee to your payroll system</CardDescription>
+                <CardDescription>
+                  Add a new employee and deposit first month salary as escrow (automatically deposited)
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -219,8 +202,13 @@ const HRDashboard: NextPage = () => {
                     onChange={e => setMonthlySalary(e.target.value)}
                   />
                 </div>
+                <Alert>
+                  <AlertDescription className="text-sm">
+                    💡 When you hire, you'll deposit the monthly salary amount as escrow automatically
+                  </AlertDescription>
+                </Alert>
                 <Button onClick={handleHireEmployee} className="w-full">
-                  Hire Employee
+                  Hire Employee & Deposit Escrow
                 </Button>
               </CardContent>
             </Card>
@@ -253,35 +241,6 @@ const HRDashboard: NextPage = () => {
                 </Alert>
                 <Button onClick={handlePaySalary} className="w-full">
                   Pay Salary
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Deposit Funds Tab */}
-          <TabsContent value="deposit">
-            <Card>
-              <CardHeader>
-                <CardTitle>Deposit to Escrow</CardTitle>
-                <CardDescription>
-                  Fund your escrow account to ensure timely salary payments. Current balance:{" "}
-                  {companyData[2] ? formatEther(companyData[2]) : "0"} ETH
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="depositAmount">Amount (ETH)</Label>
-                  <Input
-                    id="depositAmount"
-                    type="number"
-                    step="0.01"
-                    placeholder="10.0"
-                    value={depositAmount}
-                    onChange={e => setDepositAmount(e.target.value)}
-                  />
-                </div>
-                <Button onClick={handleDepositToEscrow} className="w-full">
-                  Deposit Funds
                 </Button>
               </CardContent>
             </Card>
